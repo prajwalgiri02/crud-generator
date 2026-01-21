@@ -15,13 +15,13 @@
   },
   "autoload": {
     "psr-4": {
-      "prajwal\\CrudGenerator\\": "src/"
+      "Prajwal\\CrudGenerator\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "prajwal\\CrudGenerator\\CrudGeneratorServiceProvider"
+        "Prajwal\\CrudGenerator\\CrudGeneratorServiceProvider"
       ]
     }
   },
