@@ -1,5 +1,5 @@
 {
-  "name": "prajwal/crud-generator",
+  "name": "prajwalgiri/crud-generator",
   "description": "Laravel CRUD generator for Laravel 12+, with web and API scaffolding.",
   "type": "library",
   "license": "MIT",
