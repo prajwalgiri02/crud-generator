@@ -1,0 +1,33 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-gray-200 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-xl font-bold text-gray-800">{{model}} Details</h2>
+            <div class="space-x-2">
+                <a href="{{ route('{{routeBase}}.edit', ${{modelVariable}}->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm">Edit</a>
+                <a href="{{ route('{{routeBase}}.index') }}" class="text-blue-500 hover:text-blue-700">Back to List</a>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ ${{modelVariable}}->id }}</dd>
+                </div>
+                {{showFields}}
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Created At</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ ${{modelVariable}}->created_at }}</dd>
+                </div>
+                <div class="col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Updated At</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ ${{modelVariable}}->updated_at }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>
+@endsection

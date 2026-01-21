@@ -1,0 +1,56 @@
+<?php
+
+namespace {{namespace}};
+
+use App\Http\Controllers\Controller;
+use {{modelNamespace}};
+use {{storeRequestNamespace}};
+use {{updateRequestNamespace}};
+use Illuminate\Http\Request;
+
+class {{class}} extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        ${{modelVariablePlural}} = {{model}}::latest()->paginate(10);
+        return response()->json(${{modelVariablePlural}});
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store({{storeRequest}} $request)
+    {
+        ${{modelVariable}} = {{model}}::create($request->validated());
+        return response()->json(${{modelVariable}}, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show({{model}} ${{modelVariable}})
+    {
+        return response()->json(${{modelVariable}});
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update({{updateRequest}} $request, {{model}} ${{modelVariable}})
+    {
+        ${{modelVariable}}->update($request->validated());
+        return response()->json(${{modelVariable}});
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy({{model}} ${{modelVariable}})
+    {
+        ${{modelVariable}}->delete();
+        return response()->json(null, 204);
+    }
+}

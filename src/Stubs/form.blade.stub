@@ -1,0 +1,14 @@
+<form method="POST"
+      action="{{ isset(${{modelVar}})
+          ? route('{{routeBase}}.update', ${{modelVar}})
+          : route('{{routeBase}}.store') }}">
+
+    @csrf
+    @if(isset(${{modelVar}})) @method('PUT') @endif
+
+    <!-- TODO: your inputs -->
+
+    <button type="submit" class="btn btn-success">
+        {{ isset(${{modelVar}}) ? 'Update' : 'Create' }} {{ $model }}
+    </button>
+</form>

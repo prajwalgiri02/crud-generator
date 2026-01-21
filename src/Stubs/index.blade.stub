@@ -1,0 +1,13 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <x-admin.table
+        :values="$records"
+        edit_route="{{routeBase}}.edit"
+        view_route="{{routeBase}}.show"
+        delete_route="{{routeBase}}.destroy"
+        :hidden_field="['id','slug','created_at','updated_at']"
+    />
+</div>
+@endsection

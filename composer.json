@@ -1,0 +1,30 @@
+{
+  "name": "prajwal/crud-generator",
+  "description": "Laravel CRUD generator for Laravel 12+, with web and API scaffolding.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "crud",
+    "generator",
+    "scaffold"
+  ],
+  "require": {
+    "php": "^8.2",
+    "laravel/framework": "^12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "prajwal\\CrudGenerator\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "prajwal\\CrudGenerator\\CrudGeneratorServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
