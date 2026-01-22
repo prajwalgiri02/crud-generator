@@ -2,55 +2,22 @@
 
 namespace {{namespace}};
 
-use App\Http\Controllers\Controller;
 use {{modelNamespace}};
 use {{storeRequestNamespace}};
-use {{updateRequestNamespace}};
-use Illuminate\Http\Request;
+use prajwal\CrudGenerator\Http\Controllers\SuperController;
 
-class {{class}} extends Controller
+class {{class}} extends SuperController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        ${{modelVariablePlural}} = {{model}}::latest()->paginate(10);
-        return response()->json(${{modelVariablePlural}});
-    }
+    protected string $model = {{model}}::class;
+    protected ?string $request = {{storeRequest}}::class;
+    protected bool $isApi = true;
 
     /**
-     * Store a newly created resource in storage.
+     * Optional: Override lifecycle hooks
+     * 
+     * protected function beforeCreate(array $data, $request) { return $data; }
+     * protected function afterCreate($model, $request) { }
+     * protected function beforeUpdate(array $data, $request, $model) { return $data; }
+     * protected function afterUpdate($model, $request) { }
      */
-    public function store({{storeRequest}} $request)
-    {
-        ${{modelVariable}} = {{model}}::create($request->validated());
-        return response()->json(${{modelVariable}}, 201);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show({{model}} ${{modelVariable}})
-    {
-        return response()->json(${{modelVariable}});
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update({{updateRequest}} $request, {{model}} ${{modelVariable}})
-    {
-        ${{modelVariable}}->update($request->validated());
-        return response()->json(${{modelVariable}});
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy({{model}} ${{modelVariable}})
-    {
-        ${{modelVariable}}->delete();
-        return response()->json(null, 204);
-    }
 }

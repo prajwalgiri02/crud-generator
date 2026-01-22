@@ -6,12 +6,13 @@ A simple local Laravel package to instantly scaffold complete CRUD modules using
 
 ## ✨ Features
 
--   Generate model, migration, controller, request, views, and routes
--   SuperController handles all CRUD logic dynamically
--   Uses model's `$fillable` fields for automatic mass assignment
--   Lifecycle hooks: `beforeCreate`, `afterCreate`, `beforeUpdate`, `afterUpdate`
--   Blade view generation with simple form and table layout
--   Laravel Breeze compatible (uses `layouts.app`)
+- Generate model, migration, controller, request, views, and routes
+- **Unified SuperController**: A single base class handles both Web (Blade/Redirects) and API (JSON) logic dynamically.
+- **Thin Controllers**: Generated controllers are lightweight, containing only configuration.
+- Uses model's `$fillable` fields for automatic mass assignment
+- Lifecycle hooks: `beforeCreate`, `afterCreate`, `beforeUpdate`, `afterUpdate`
+- Blade view generation with simple form and table layout
+- Laravel Breeze compatible (uses `layouts.app`)
 
 ---
 
@@ -19,62 +20,68 @@ A simple local Laravel package to instantly scaffold complete CRUD modules using
 
 1. **Create local package directory**:
 
-    ```bash
-    mkdir -p packages/prajwal/CrudGenerator
-    ```
+   ```bash
+   mkdir -p packages/prajwal/CrudGenerator
+   ```
 
 2. **Update `composer.json` autoload**:
 
-    ```json
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "prajwal\\CrudGenerator\\": "packages/prajwal/CrudGenerator/src/"
-        }
-    }
-    ```
+   ```json
+   "autoload": {
+       "psr-4": {
+           "App\\": "app/",
+           "prajwal\\CrudGenerator\\": "packages/prajwal/CrudGenerator/src/"
+       }
+   }
+   ```
 
-    Then run:
+   Then run:
 
-    ```bash
-    composer dump-autoload
-    ```
+   ```bash
+   composer dump-autoload
+   ```
 
 3. **Register the command in `AppServiceProvider`**:
 
-    In `app/Providers/AppServiceProvider.php`:
+   In `app/Providers/AppServiceProvider.php`:
 
-    ```php
-    use prajwal\CrudGenerator\Commands\CrudGenerateCommand;
+   ```php
+   use prajwal\CrudGenerator\Commands\CrudGenerateCommand;
 
-    public function boot(): void
-    {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                CrudGenerateCommand::class,
-            ]);
-        }
-    }
-    ```
+   public function boot(): void
+   {
+       if ($this->app->runningInConsole()) {
+           $this->commands([
+               CrudGenerateCommand::class,
+           ]);
+       }
+   }
+   ```
 
 ---
 
 ## ⚙️ Usage
 
-Generate a new CRUD module by running:
+### Generate Web CRUD
 
 ```bash
-php artisan crud:generate Post
+php artisan crud:generate Post --fields="title:string,content:text"
 ```
 
-This will generate:
+### Generate API CRUD
 
--   `app/Models/Post.php`
--   `database/migrations/...create_posts_table.php`
--   `app/Http/Requests/StorePostRequest.php`
--   `app/Http/Controllers/PostController.php`
--   Blade views in `resources/views/posts/`
--   `Route::resource('posts', PostController::class);` appended to `routes/web.php`
+```bash
+php artisan crud:generate Post --fields="title:string,content:text" --api
+```
+
+### Generated Files:
+
+- `app/Models/Post.php`
+- `database/migrations/...create_posts_table.php`
+- `app/Http/Requests/StorePostRequest.php`
+- `app/Http/Controllers/PostController.php` (Extends `SuperController`)
+- Blade views in `resources/views/posts/` (Web only)
+- Routes appended to `routes/web.php` or `routes/api.php`
 
 ---
 
@@ -88,10 +95,9 @@ packages/prajwal/CrudGenerator/src/Http/Controllers/SuperController.php
 
 ### Responsibilities:
 
--   Handles all CRUD operations dynamically
--   Uses the provided model's `$fillable` fields
--   Uses a FormRequest for validation
--   Automatically returns views based on model name
+- **Dual Mode Support**: Automatically switches between JSON (API) and Blade Views (Web) based on the request type or `$isApi` property.
+- **Configuration Based**: Generated controllers only need to define `$model` and `$request`.
+- **Dynamic Routing**: Automatically computes view paths and route names based on the model.
 
 ### Lifecycle Hook Methods:
 
@@ -102,11 +108,9 @@ protected function beforeUpdate(array $data, Request $request, Model $model) { .
 protected function afterUpdate(Model $model, Request $request) { ... }
 ```
 
-These allow custom logic like file uploads, notifications, logging, etc.
-
 ---
 
-## 👁‍🗨️ Example Controller Output
+## 👁‍🗨️ Example Controller Output (Web)
 
 ```php
 namespace App\Http\Controllers;
@@ -118,23 +122,18 @@ use prajwal\CrudGenerator\Http\Controllers\SuperController;
 class PostController extends SuperController
 {
     protected string $model = Post::class;
-    protected string $request = StorePostRequest::class;
-
-    // Optional lifecycle methods:
-    // protected function beforeCreate(array $data, $request) { ... }
-    // protected function afterCreate($model, $request) { ... }
+    protected ?string $request = StorePostRequest::class;
 }
 ```
 
 ---
 
-## 🚀 Roadmap Ideas (optional future additions)
+## 🚀 Roadmap Ideas
 
--   Auto-generate `$fillable` fields from DB schema
--   Smart form inputs based on column types
--   Relationship detection and rendering
--   File/image upload support
--   API Resource generation
+- Auto-generate `$fillable` fields from DB schema
+- Smart form inputs based on column types
+- Relationship detection and rendering
+- File/image upload support (Basic support already in SuperController)
 
 ---
 

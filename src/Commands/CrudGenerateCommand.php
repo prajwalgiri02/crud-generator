@@ -92,7 +92,6 @@ class CrudGenerateCommand extends Command
             '{{modelVariablePlural}}' => Str::camel(Str::plural($modelName)),
             '{{viewPath}}' => $viewPath,
             '{{routeBase}}' => $routeBase,
-            '{{searchLogic}}' => $searchLogic,
 
             // Request
             '{{rules}}' => $this->generatorService->generateValidationRules($fields),

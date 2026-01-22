@@ -10,21 +10,35 @@ abstract class SuperController extends Controller
 {
     protected string $model;
     protected ?string $request = null;
+    protected bool $isApi = false;
 
     public function index()
     {
         $records = ($this->model)::latest()->paginate(10);
+        
+        if ($this->wantsJson()) {
+            return response()->json($records);
+        }
+        
         return view($this->view('index'), compact('records'));
     }
 
     public function create()
     {
+        if ($this->wantsJson()) {
+            return response()->json(['message' => 'Not supported in API'], 405);
+        }
         return view($this->view('create'));
     }
 
     public function show($id)
     {
         $record = ($this->model)::findOrFail($id);
+        
+        if ($this->wantsJson()) {
+            return response()->json($record);
+        }
+        
         return view($this->view('show'), compact('record'));
     }
 
@@ -43,11 +57,18 @@ abstract class SuperController extends Controller
             $this->afterCreate($model, $request);
         }
 
+        if ($this->wantsJson()) {
+            return response()->json($model, 201);
+        }
+
         return redirect()->route($this->routeName('index'))->with('success', 'Created!');
     }
 
     public function edit($id)
     {
+        if ($this->wantsJson()) {
+            return response()->json(['message' => 'Not supported in API'], 405);
+        }
         $record = ($this->model)::findOrFail($id);
         return view($this->view('edit'), compact('record'));
     }
@@ -68,6 +89,10 @@ abstract class SuperController extends Controller
             $this->afterUpdate($record, $request);
         }
 
+        if ($this->wantsJson()) {
+            return response()->json($record);
+        }
+
         return redirect()->route($this->routeName('index'))->with('success', 'Updated!');
     }
 
@@ -75,10 +100,23 @@ abstract class SuperController extends Controller
     {
         $record = ($this->model)::findOrFail($id);
         $record->delete();
+
+        if ($this->wantsJson()) {
+            return response()->json(null, 204);
+        }
+
         return redirect()->route($this->routeName('index'))->with('success', 'Deleted!');
     }
 
     /* -------------------- helpers -------------------- */
+
+    /**
+     * Determine if the response should be JSON.
+     */
+    protected function wantsJson(): bool
+    {
+        return $this->isApi || request()->expectsJson();
+    }
 
     /**
      * Blade view key, e.g.:
