@@ -155,7 +155,7 @@ class CrudGenerateCommand extends Command
              $this->appendWebRoute($routeBase, $controllerNamespace . "\\{$modelName}Controller");
         }
 
-        $this->info("✅ CRUD generated successfully!");
+        $this->info("CRUD generated successfully!");
     }
 
     protected function generateFile($stubName, $destination, $replacements)
@@ -165,7 +165,7 @@ class CrudGenerateCommand extends Command
             return;
         }
 
-        $stubContent = File::get(__DIR__ . '/../Stubs/' . $stubName);
+        $stubContent = File::get(__DIR__ . '/../stubs/' . $stubName);
         $content = str_replace(array_keys($replacements), array_values($replacements), $stubContent);
 
         File::put($destination, $content);

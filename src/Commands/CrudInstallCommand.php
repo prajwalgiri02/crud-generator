@@ -25,7 +25,7 @@ class CrudInstallCommand extends Command
             '--force' => $this->option('force'), 
         ]);
 
-        $this->info('✅ CRUD Generator installed successfully!');
+        $this->info('CRUD Generator installed successfully!');
     }
 
     protected function publishLayout()
@@ -39,13 +39,13 @@ class CrudInstallCommand extends Command
 
         if (File::exists($layoutPath) && !$this->option('force')) {
             if ($this->components->confirm("Layout file already exists at {$layoutPath}. Do you want to overwrite it?")) {
-                File::copy(__DIR__ . '/../Stubs/views/layouts/app.blade.stub', $layoutPath);
+                File::copy(__DIR__ . '/../stubs/views/layouts/app.blade.stub', $layoutPath);
                 $this->info("Layout published: {$layoutPath}");
             } else {
                 $this->warn("Skipped publishing layout.");
             }
         } else {
-            File::copy(__DIR__ . '/../Stubs/views/layouts/app.blade.stub', $layoutPath);
+            File::copy(__DIR__ . '/../stubs/views/layouts/app.blade.stub', $layoutPath);
             $this->info("Layout published: {$layoutPath}");
         }
     }
