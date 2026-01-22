@@ -165,7 +165,7 @@ class CrudGenerateCommand extends Command
             return;
         }
 
-        $stubContent = File::get(__DIR__ . '/../stubs/' . $stubName);
+        $stubContent = File::get(__DIR__ . '/../../stubs/' . $stubName);
         $content = str_replace(array_keys($replacements), array_values($replacements), $stubContent);
 
         File::put($destination, $content);
