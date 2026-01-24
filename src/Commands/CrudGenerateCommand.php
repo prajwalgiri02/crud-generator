@@ -42,8 +42,8 @@ class CrudGenerateCommand extends Command
 
         $modelNamespace = 'App\\Models';
         $controllerNamespace = 'App\\Http\\Controllers' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
-        $requestNamespace = 'App\\Http\\Requests' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
-        $resourceNamespace = 'App\\Http\\Resources' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
+        $requestNamespace = 'App\\Http\\Requests' . ($prefixNamespace ? "\\{$prefixNamespace}" : '') . "\\{$modelName}";
+        $resourceNamespace = 'App\\Http\\Resources' . ($prefixNamespace ? "\\{$prefixNamespace}" : '') . "\\{$modelName}";
 
         $viewPath = implode('.', array_merge(array_map([Str::class, 'snake'], $parts), [Str::plural(Str::snake($modelName))]));
         $viewPath = trim($viewPath, '.'); // e.g. admin.posts
@@ -84,11 +84,11 @@ class CrudGenerateCommand extends Command
             // Controller
             '{{controllerNamespace}}' => $controllerNamespace,
             '{{modelNamespace}}' => "{$modelNamespace}\\{$modelName}",
-            '{{storeRequestNamespace}}' => "{$requestNamespace}\\Store{$modelName}Request",
-            '{{updateRequestNamespace}}' => "{$requestNamespace}\\Update{$modelName}Request",
+            '{{storeRequestNamespace}}' => "{$requestNamespace}\\StoreRequest",
+            '{{updateRequestNamespace}}' => "{$requestNamespace}\\UpdateRequest",
             '{{resourceNamespace}}' => "{$resourceNamespace}\\{$modelName}Resource",
-            '{{storeRequest}}' => "Store{$modelName}Request",
-            '{{updateRequest}}' => "Update{$modelName}Request",
+            '{{storeRequest}}' => "StoreRequest",
+            '{{updateRequest}}' => "UpdateRequest",
             '{{resource}}' => "{$modelName}Resource",
             '{{model}}' => $modelName,
             '{{modelVariable}}' => Str::camel($modelName),
@@ -115,19 +115,19 @@ class CrudGenerateCommand extends Command
         $this->generateFile('migration.stub', database_path("migrations/{$migrationName}"), $replacements);
 
         // 3. Requests
-        $requestDir = app_path('Http/Requests' . ($prefixSlash ? "/{$prefixSlash}" : ''));
+        $requestDir = app_path('Http/Requests' . ($prefixSlash ? "/{$prefixSlash}" : '') . "/{$modelName}");
         if (!File::exists($requestDir)) File::makeDirectory($requestDir, 0755, true);
         
         $replacements['{{namespace}}'] = $requestNamespace;
-        $replacements['{{class}}'] = "Store{$modelName}Request";
-        $this->generateFile('request.store.stub', "{$requestDir}/Store{$modelName}Request.php", $replacements);
+        $replacements['{{class}}'] = "StoreRequest";
+        $this->generateFile('request.store.stub', "{$requestDir}/StoreRequest.php", $replacements);
 
-        $replacements['{{class}}'] = "Update{$modelName}Request";
-        $this->generateFile('request.update.stub', "{$requestDir}/Update{$modelName}Request.php", $replacements);
+        $replacements['{{class}}'] = "UpdateRequest";
+        $this->generateFile('request.update.stub', "{$requestDir}/UpdateRequest.php", $replacements);
 
         // 3.5 Resource (Only if API)
         if ($this->option('api')) {
-            $resourceDir = app_path('Http/Resources' . ($prefixSlash ? "/{$prefixSlash}" : ''));
+            $resourceDir = app_path('Http/Resources' . ($prefixSlash ? "/{$prefixSlash}" : '') . "/{$modelName}");
             if (!File::exists($resourceDir)) File::makeDirectory($resourceDir, 0755, true);
             
             $replacements['{{namespace}}'] = $resourceNamespace;

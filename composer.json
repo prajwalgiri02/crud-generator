@@ -18,6 +18,15 @@
       "Prajwal\\CrudGenerator\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Prajwal\\CrudGenerator\\Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0",
+    "phpunit/phpunit": "^11.0"
+  },
   "extra": {
     "laravel": {
       "providers": [
