@@ -1,1 +1,0 @@
-{"version":2,"defects":[],"times":{"Prajwal\\CrudGenerator\\Tests\\Feature\\CrudGenerateCommandTest::it_generates_web_crud_files":0.179,"Prajwal\\CrudGenerator\\Tests\\Feature\\CrudGenerateCommandTest::it_generates_api_crud_files":0.006,"Prajwal\\CrudGenerator\\Tests\\Feature\\CrudGenerateCommandTest::it_replaces_placeholders_with_and_without_spaces":0.062}}
