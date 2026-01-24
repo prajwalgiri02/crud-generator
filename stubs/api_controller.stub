@@ -1,19 +1,19 @@
 <?php
 
-namespace {{ namespace }};
+namespace {{namespace}};
 
-use {{ modelNamespace }};
-use {{ storeRequestNamespace }};
-use {{ updateRequestNamespace }};
-use {{ resourceNamespace }};
+use {{modelNamespace}};
+use {{storeRequestNamespace}};
+use {{updateRequestNamespace}};
+use {{resourceNamespace}};
 use Prajwal\CrudGenerator\Http\Controllers\ApiSuperController;
 
-class {{ class }} extends ApiSuperController
+class {{class}} extends ApiSuperController
 {
-    protected string $model = {{ model }}::class;
-    protected ?string $request = {{ storeRequest }}::class;
-    protected ?string $updateRequest = {{ updateRequest }}::class;
-    protected ?string $resource = {{ resource }}::class;
+    protected string $model = {{model}}::class;
+    protected ?string $request = {{storeRequest}}::class;
+    protected ?string $updateRequest = {{updateRequest}}::class;
+    protected ?string $resource = {{resource}}::class;
     protected int $perPage = 10;
 
     protected function beforeCreate(array $data, $request)

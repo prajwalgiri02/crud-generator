@@ -1,44 +1,44 @@
-    <?php
+<?php
 
-    namespace {{ namespace }};
+namespace {{namespace}};
 
-    use {{ modelNamespace }};
-    use {{ storeRequestNamespace }};
-    use {{ updateRequestNamespace }};
-    use Prajwal\CrudGenerator\Http\Controllers\WebSuperController;
+use {{modelNamespace}};
+use {{storeRequestNamespace}};
+use {{updateRequestNamespace}};
+use Prajwal\CrudGenerator\Http\Controllers\WebSuperController;
 
-    class {{ class }} extends WebSuperController
+class {{class}} extends WebSuperController
+{
+    protected string $model = {{model}}::class;
+    protected ?string $request = {{storeRequest}}::class;
+    protected ?string $updateRequest = {{updateRequest}}::class;
+    protected int $perPage = 10;
+
+    // Optional: Custom redirect route (defaults to auto-generated route)
+    // protected ?string $redirectRoute = '{{routeBase}}.index';
+
+    // Optional: Custom success messages
+    // protected string $createMessage = 'Created successfully!';
+    // protected string $updateMessage = 'Updated successfully!';
+    // protected string $deleteMessage = 'Deleted successfully!';
+
+    protected function beforeCreate(array $data, $request)
     {
-        protected string $model = {{ model }}::class;
-        protected ?string $request = {{ storeRequest }}::class;
-        protected ?string $updateRequest = {{ updateRequest }}::class;
-        protected int $perPage = 10;
-
-        // Optional: Custom redirect route (defaults to auto-generated route)
-        // protected ?string $redirectRoute = '{{ routeBase }}.index';
-
-        // Optional: Custom success messages
-        // protected string $createMessage = 'Created successfully!';
-        // protected string $updateMessage = 'Updated successfully!';
-        // protected string $deleteMessage = 'Deleted successfully!';
-
-        protected function beforeCreate(array $data, $request)
-        {
-            return $data;
-        }
-
-        protected function afterCreate($model, $request)
-        {
-            //
-        }
-
-        protected function beforeUpdate(array $data, $request, $model)
-        {
-            return $data;
-        }
-
-        protected function afterUpdate($model, $request)
-        {
-            //
-        }
+        return $data;
     }
+
+    protected function afterCreate($model, $request)
+    {
+        //
+    }
+
+    protected function beforeUpdate(array $data, $request, $model)
+    {
+        return $data;
+    }
+
+    protected function afterUpdate($model, $request)
+    {
+        //
+    }
+}

@@ -178,7 +178,17 @@ class CrudGenerateCommand extends Command
         }
 
         $stubContent = File::get(__DIR__ . '/../../stubs/' . $stubName);
-        $content = str_replace(array_keys($replacements), array_values($replacements), $stubContent);
+        
+        // Support both {{key}} and {{ key }} formats
+        $finalReplacements = [];
+        foreach ($replacements as $key => $value) {
+            $finalReplacements[$key] = $value;
+            // Also generate the spaced version: {{ key }}
+            $spacedKey = str_replace(['{{', '}}'], ['{{ ', ' }}'], $key);
+            $finalReplacements[$spacedKey] = $value;
+        }
+
+        $content = str_replace(array_keys($finalReplacements), array_values($finalReplacements), $stubContent);
 
         File::put($destination, $content);
         $this->info("Generated: {$destination}");
