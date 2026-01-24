@@ -1,11 +1,11 @@
 <?php
 
-namespace prajwal\CrudGenerator\Commands;
+namespace Prajwal\CrudGenerator\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use prajwal\CrudGenerator\Services\GeneratorService;
+use Prajwal\CrudGenerator\Services\GeneratorService;
 
 class CrudGenerateCommand extends Command
 {
@@ -43,6 +43,7 @@ class CrudGenerateCommand extends Command
         $modelNamespace = 'App\\Models';
         $controllerNamespace = 'App\\Http\\Controllers' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
         $requestNamespace = 'App\\Http\\Requests' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
+        $resourceNamespace = 'App\\Http\\Resources' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
 
         $viewPath = implode('.', array_merge(array_map([Str::class, 'snake'], $parts), [Str::plural(Str::snake($modelName))]));
         $viewPath = trim($viewPath, '.'); // e.g. admin.posts
@@ -85,8 +86,10 @@ class CrudGenerateCommand extends Command
             '{{modelNamespace}}' => "{$modelNamespace}\\{$modelName}",
             '{{storeRequestNamespace}}' => "{$requestNamespace}\\Store{$modelName}Request",
             '{{updateRequestNamespace}}' => "{$requestNamespace}\\Update{$modelName}Request",
+            '{{resourceNamespace}}' => "{$resourceNamespace}\\{$modelName}Resource",
             '{{storeRequest}}' => "Store{$modelName}Request",
             '{{updateRequest}}' => "Update{$modelName}Request",
+            '{{resource}}' => "{$modelName}Resource",
             '{{model}}' => $modelName,
             '{{modelVariable}}' => Str::camel($modelName),
             '{{modelVariablePlural}}' => Str::camel(Str::plural($modelName)),
@@ -121,6 +124,16 @@ class CrudGenerateCommand extends Command
 
         $replacements['{{class}}'] = "Update{$modelName}Request";
         $this->generateFile('request.update.stub', "{$requestDir}/Update{$modelName}Request.php", $replacements);
+
+        // 3.5 Resource (Only if API)
+        if ($this->option('api')) {
+            $resourceDir = app_path('Http/Resources' . ($prefixSlash ? "/{$prefixSlash}" : ''));
+            if (!File::exists($resourceDir)) File::makeDirectory($resourceDir, 0755, true);
+            
+            $replacements['{{namespace}}'] = $resourceNamespace;
+            $replacements['{{class}}'] = "{$modelName}Resource";
+            $this->generateFile('resource.stub', "{$resourceDir}/{$modelName}Resource.php", $replacements);
+        }
 
         // 4. Controller
         $controllerDir = app_path('Http/Controllers' . ($prefixSlash ? "/{$prefixSlash}" : ''));

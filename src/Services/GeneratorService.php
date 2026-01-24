@@ -1,6 +1,6 @@
 <?php
 
-namespace prajwal\CrudGenerator\Services;
+namespace Prajwal\CrudGenerator\Services;
 
 use Illuminate\Support\Str;
 

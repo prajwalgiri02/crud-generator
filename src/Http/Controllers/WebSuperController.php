@@ -1,50 +1,56 @@
 <?php
 
-namespace prajwal\CrudGenerator\Http\Controllers;
+namespace Prajwal\CrudGenerator\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 
-abstract class SuperController extends Controller
+/**
+ * Base controller for Web/Blade CRUD operations.
+ * All web controllers should extend this class.
+ */
+abstract class WebSuperController extends Controller
 {
     protected string $model;
     protected ?string $request = null;
-    protected bool $isApi = false;
+    protected ?string $updateRequest = null;
+    protected int $perPage = 10;
+
+    /**
+     * Custom redirect route after store/update/delete.
+     * If null, uses auto-generated route based on model name.
+     * Example: 'admin.posts.index'
+     */
+    protected ?string $redirectRoute = null;
+
+    /**
+     * Custom success messages
+     */
+    protected string $createMessage = 'Created successfully!';
+    protected string $updateMessage = 'Updated successfully!';
+    protected string $deleteMessage = 'Deleted successfully!';
 
     public function index()
     {
-        $records = ($this->model)::latest()->paginate(10);
-        
-        if ($this->wantsJson()) {
-            return response()->json($records);
-        }
-        
+        $records = ($this->model)::latest()->paginate($this->perPage);
         return view($this->view('index'), compact('records'));
     }
 
     public function create()
     {
-        if ($this->wantsJson()) {
-            return response()->json(['message' => 'Not supported in API'], 405);
-        }
         return view($this->view('create'));
     }
 
     public function show($id)
     {
         $record = ($this->model)::findOrFail($id);
-        
-        if ($this->wantsJson()) {
-            return response()->json($record);
-        }
-        
         return view($this->view('show'), compact('record'));
     }
 
     public function store(Request $defaultRequest)
     {
-        $request = $this->resolveRequest($defaultRequest);
+        $request = $this->resolveRequest($defaultRequest, 'store');
         $data = $request->validated();
 
         if (method_exists($this, 'beforeCreate')) {
@@ -57,18 +63,11 @@ abstract class SuperController extends Controller
             $this->afterCreate($model, $request);
         }
 
-        if ($this->wantsJson()) {
-            return response()->json($model, 201);
-        }
-
-        return redirect()->route($this->routeName('index'))->with('success', 'Created!');
+        return redirect()->route($this->getRedirectRoute())->with('success', $this->createMessage);
     }
 
     public function edit($id)
     {
-        if ($this->wantsJson()) {
-            return response()->json(['message' => 'Not supported in API'], 405);
-        }
         $record = ($this->model)::findOrFail($id);
         return view($this->view('edit'), compact('record'));
     }
@@ -76,7 +75,7 @@ abstract class SuperController extends Controller
     public function update(Request $defaultRequest, $id)
     {
         $record  = ($this->model)::findOrFail($id);
-        $request = $this->resolveRequest($defaultRequest);
+        $request = $this->resolveRequest($defaultRequest, 'update');
         $data    = $request->validated();
 
         if (method_exists($this, 'beforeUpdate')) {
@@ -89,11 +88,7 @@ abstract class SuperController extends Controller
             $this->afterUpdate($record, $request);
         }
 
-        if ($this->wantsJson()) {
-            return response()->json($record);
-        }
-
-        return redirect()->route($this->routeName('index'))->with('success', 'Updated!');
+        return redirect()->route($this->getRedirectRoute())->with('success', $this->updateMessage);
     }
 
     public function destroy($id)
@@ -101,89 +96,84 @@ abstract class SuperController extends Controller
         $record = ($this->model)::findOrFail($id);
         $record->delete();
 
-        if ($this->wantsJson()) {
-            return response()->json(null, 204);
-        }
-
-        return redirect()->route($this->routeName('index'))->with('success', 'Deleted!');
+        return redirect()->route($this->getRedirectRoute())->with('success', $this->deleteMessage);
     }
 
     /* -------------------- helpers -------------------- */
 
     /**
-     * Determine if the response should be JSON.
+     * Get the redirect route for after store/update/delete operations.
      */
-    protected function wantsJson(): bool
+    protected function getRedirectRoute(string $action = 'index'): string
     {
-        return $this->isApi || request()->expectsJson();
+        if ($this->redirectRoute) {
+            return $this->redirectRoute;
+        }
+        return $this->routeName($action);
     }
 
     /**
-     * Blade view key, e.g.:
-     * - blogs.index
-     * - admin.blogs.index (when controller is under App\Http\Controllers\Admin)
+     * Blade view key, e.g.: blogs.index or admin.blogs.index
      */
     protected function view(string $view): string
     {
-        $folder = Str::plural(Str::snake(class_basename($this->model))); // e.g., blogs
-        $prefix = $this->controllerPrefixDot();                          // e.g., admin or ''
+        $folder = Str::plural(Str::snake(class_basename($this->model)));
+        $prefix = $this->controllerPrefixDot();
         return ltrim($prefix . ($prefix ? '.' : '') . $folder . '.' . $view, '.');
     }
 
     /**
-     * Route name, e.g.:
-     * - blogs.index
-     * - admin.blogs.index (when prefixed)
+     * Route name, e.g.: blogs.index or admin.blogs.index
      */
     protected function routeName(string $action): string
     {
-        $name   = Str::plural(Str::snake(class_basename($this->model))); // blogs
-        $prefix = $this->controllerPrefixDot();                          // admin or ''
+        $name   = Str::plural(Str::snake(class_basename($this->model)));
+        $prefix = $this->controllerPrefixDot();
         return trim(($prefix ? $prefix . '.' : '') . $name . '.' . $action, '.');
     }
 
     /**
      * Resolve a FormRequest if provided, else use the default Request.
      */
-    protected function resolveRequest(Request $fallback)
+    protected function resolveRequest(Request $fallback, string $operation = 'store')
     {
-        return $this->request ? app($this->request) : $fallback;
+        $requestClass = match($operation) {
+            'update' => $this->updateRequest ?? $this->request,
+            default  => $this->request,
+        };
+
+        return $requestClass ? app($requestClass) : $fallback;
     }
 
     /**
      * Compute controller namespace prefix after "Http\Controllers\", converted to dot.case
-     * App\Http\Controllers\Admin\AnythingController => "admin"
-     * App\Http\Controllers\Admin\V1\AnythingController => "admin.v1"
-     * App\Http\Controllers\AnythingController => ""
      */
     protected function controllerPrefixDot(): string
     {
-        $ns = static::class; // full controller FQN
+        $ns = static::class;
         $needle = 'Http\\Controllers\\';
         $pos = strpos($ns, $needle);
         if ($pos === false) {
             return '';
         }
-        $after = substr($ns, $pos + strlen($needle)); // e.g., "Admin\BlogController"
+        $after = substr($ns, $pos + strlen($needle));
         $segments = explode('\\', $after);
-        array_pop($segments); // remove "BlogController"
+        array_pop($segments);
 
         if (empty($segments)) {
             return '';
         }
 
-        $segments = array_map(fn ($s) => Str::snake($s), $segments); // Admin\V1 => ['admin','v1']
-        return implode('.', $segments); // "admin.v1"
+        $segments = array_map(fn ($s) => Str::snake($s), $segments);
+        return implode('.', $segments);
     }
 
     /**
      * Handle file uploads for fields present in the request.
-     * Stores files in "public/uploads/{modelName}" and returns updated data array with file paths.
      */
     protected function handleFileUploads(Request $request, array $data): array
     {
         foreach ($request->allFiles() as $key => $file) {
-            // Only process if this key is part of the validated data
             if (array_key_exists($key, $data)) {
                 $folder = Str::plural(Str::snake(class_basename($this->model)));
                 $path = $file->store("uploads/{$folder}", 'public');
