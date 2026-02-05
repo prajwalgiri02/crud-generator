@@ -44,6 +44,7 @@ class CrudGenerateCommand extends Command
         $controllerNamespace = 'App\\Http\\Controllers' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
         $requestNamespace = 'App\\Http\\Requests' . ($prefixNamespace ? "\\{$prefixNamespace}" : '') . "\\{$modelName}";
         $resourceNamespace = 'App\\Http\\Resources' . ($prefixNamespace ? "\\{$prefixNamespace}" : '') . "\\{$modelName}";
+        $serviceNamespace = 'App\\Services' . ($prefixNamespace ? "\\{$prefixNamespace}" : '');
 
         $viewPath = implode('.', array_merge(array_map([Str::class, 'snake'], $parts), [Str::plural(Str::snake($modelName))]));
         $viewPath = trim($viewPath, '.'); // e.g. admin.posts
@@ -87,6 +88,8 @@ class CrudGenerateCommand extends Command
             '{{storeRequestNamespace}}' => "{$requestNamespace}\\StoreRequest",
             '{{updateRequestNamespace}}' => "{$requestNamespace}\\UpdateRequest",
             '{{resourceNamespace}}' => "{$resourceNamespace}\\{$modelName}Resource",
+            '{{serviceNamespace}}' => $serviceNamespace,
+            '{{serviceClass}}' => "{$modelName}Service",
             '{{storeRequest}}' => "StoreRequest",
             '{{updateRequest}}' => "UpdateRequest",
             '{{resource}}' => "{$modelName}Resource",
@@ -134,6 +137,15 @@ class CrudGenerateCommand extends Command
             $replacements['{{class}}'] = "{$modelName}Resource";
             $this->generateFile('resource.stub', "{$resourceDir}/{$modelName}Resource.php", $replacements);
         }
+
+        // 3.6 Service
+        $serviceDir = app_path('Services' . ($prefixSlash ? "/{$prefixSlash}" : ''));
+        if (!File::exists($serviceDir)) File::makeDirectory($serviceDir, 0755, true);
+        
+        $serviceReplacements = $replacements;
+        $serviceReplacements['{{namespace}}'] = $serviceNamespace;
+        $serviceReplacements['{{class}}'] = "{$modelName}Service";
+        $this->generateFile('service.stub', "{$serviceDir}/{$modelName}Service.php", $serviceReplacements);
 
         // 4. Controller
         $controllerDir = app_path('Http/Controllers' . ($prefixSlash ? "/{$prefixSlash}" : ''));

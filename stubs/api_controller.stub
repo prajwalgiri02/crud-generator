@@ -6,7 +6,9 @@ use {{modelNamespace}};
 use {{storeRequestNamespace}};
 use {{updateRequestNamespace}};
 use {{resourceNamespace}};
+use {{serviceNamespace}}\{{serviceClass}};
 use Prajwal\CrudGenerator\Http\Controllers\ApiSuperController;
+use Illuminate\Http\Request;
 
 class {{class}} extends ApiSuperController
 {
@@ -14,25 +16,40 @@ class {{class}} extends ApiSuperController
     protected ?string $request = {{storeRequest}}::class;
     protected ?string $updateRequest = {{updateRequest}}::class;
     protected ?string $resource = {{resource}}::class;
-    protected int $perPage = 10;
+    
+    protected {{serviceClass}} $service;
 
-    protected function beforeCreate(array $data, $request)
+    public function __construct({{serviceClass}} $service)
     {
-        return $data;
+        $this->service = $service;
     }
 
-    protected function afterCreate($model, $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $defaultRequest)
     {
-        //
+        $request = $this->resolveRequest($defaultRequest, 'store');
+        $data = $request->validated();
+
+        // Logic moved to Service (including transactions)
+        $model = $this->service->create($data);
+
+        return $this->transform($model, 201);
     }
 
-    protected function beforeUpdate(array $data, $request, $model)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $defaultRequest, $id)
     {
-        return $data;
-    }
+        $record  = ($this->model)::findOrFail($id);
+        $request = $this->resolveRequest($defaultRequest, 'update');
+        $data    = $request->validated();
 
-    protected function afterUpdate($model, $request)
-    {
-        //
+        // Logic moved to Service (including transactions)
+        $record = $this->service->update($record, $data);
+
+        return $this->transform($record);
     }
 }

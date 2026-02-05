@@ -1,0 +1,75 @@
+<?php
+
+namespace {{serviceNamespace}};
+
+use {{modelNamespace}};
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
+
+class {{class}}
+{
+    /**
+     * Create a new record with transaction management.
+     */
+    public function create(array $data): {{model}}
+    {
+        DB::beginTransaction();
+
+        try {
+            // Add custom mapping logic here if needed
+            $record = {{model}}::create($data);
+
+            // Handle additional logic (e.g., syncing relationships)
+            if (method_exists($this, 'afterCreate')) {
+                $this->afterCreate($record, $data);
+            }
+
+            DB::commit();
+            return $record;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to create {{modelVariable}}: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Update an existing record.
+     */
+    public function update({{model}} $record, array $data): {{model}}
+    {
+        DB::beginTransaction();
+
+        try {
+            $record->update($data);
+
+            if (method_exists($this, 'afterUpdate')) {
+                $this->afterUpdate($record, $data);
+            }
+
+            DB::commit();
+            return $record;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to update {{modelVariable}}: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Optional hook for post-creation logic.
+     */
+    protected function afterCreate({{model}} $record, array $data): void
+    {
+        // Implement logic for relationships, media, etc.
+    }
+
+    /**
+     * Optional hook for post-update logic.
+     */
+    protected function afterUpdate({{model}} $record, array $data): void
+    {
+        // Implement logic for relationships, media, etc.
+    }
+}
